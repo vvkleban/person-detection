@@ -1,0 +1,6 @@
+path: /home/vova/workspace/personDetection/dataset
+train: images  # Path to training images
+val: images    # Path to validation images
+nc: 3          # Number of classes (names)
+names: [Vova, Sha, Leo]
+
