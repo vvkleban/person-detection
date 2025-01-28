@@ -17,10 +17,10 @@ def removeSuffixes(filename, suffixes):
 
 class VideoAnalyzer:
 
-    model = YOLO("/home/vova/runs/detect/train5/weights/best.pt")
+    model = YOLO("/home/vova/runs/detect/train5/weights/last.pt")
     suffixes= ["_Vova", "_Sha", "_Leo"]
 
-    def isPersonInVideo(self, videoPath, frame_skip=10, confidence_threshold=0.8):
+    def isPersonInVideo(self, videoPath, frame_skip=20, confidence_threshold=0.92):
         print(f"Analyzing {videoPath}")
         cap = cv2.VideoCapture(videoPath)
         if not cap.isOpened():
@@ -31,47 +31,47 @@ class VideoAnalyzer:
         sha= False
         leo= False
 
-#        try:
-        while cap.isOpened():
-            ret, frame = cap.read()
-            if not ret:
-                break
+        try:
+            while cap.isOpened():
+                ret, frame = cap.read()
+                if not ret:
+                    break
 
-            frame_count += 1
-            if frame_count % frame_skip != 0:
-                continue
+                frame_count += 1
+                if frame_count % frame_skip != 0:
+                    continue
 
-            # Use YOLO to predict objects in the current frame
-            results = self.model.predict(frame, conf=confidence_threshold, show=False, device="cuda:0")
-            #results = self.model.predict(frame, conf=confidence_threshold, show=False, device="cpu")
-            for result in results:
-                for box, cls, conf in zip(result.boxes.xyxy, result.boxes.cls, result.boxes.conf):
-                    class_name = result.names[int(cls)]
-                    print(f"Frame {frame_count}: Detected {class_name} with confidence {conf:.2f}")
-                    if class_name == "Vova":  # Check if a person is detected
-                        vova = True
-                    elif class_name == "Sha":
-                        sha= True
-                    elif class_name == "Leo":
-                        leo= True
+                # Use YOLO to predict objects in the current frame
+                results = self.model.predict(frame, conf=confidence_threshold, show=False, device="cuda:0")
+                #results = self.model.predict(frame, conf=confidence_threshold, show=False, device="cpu")
+                for result in results:
+                    for box, cls, conf in zip(result.boxes.xyxy, result.boxes.cls, result.boxes.conf):
+                        class_name = result.names[int(cls)]
+                        print(f"Frame {frame_count}: Detected {class_name} with confidence {conf:.2f}")
+                        if class_name == "Vova":  # Check if a person is detected
+                            vova = True
+                        elif class_name == "Sha":
+                            sha= True
+                        elif class_name == "Leo":
+                            leo= True
 
-            if vova and sha and leo:
-                break
+                if vova and sha and leo:
+                    break
 
-        cap.release()
+            cap.release()
 
-        suffix= ""
-        if vova:
-            suffix += self.suffixes[0]
-        if sha:
-            suffix += self.suffixes[1]
-        if leo:
-            suffix += self.suffixes[2]
+            suffix= ""
+            if vova:
+                suffix += self.suffixes[0]
+            if sha:
+                suffix += self.suffixes[1]
+            if leo:
+                suffix += self.suffixes[2]
 
-        return suffix
+            return suffix
 
-#        except Exception as e:
-#            raise VideoParsingError("Failed parsing video {videoPath}: {e}") from e
+        except Exception as e:
+            raise VideoParsingError("Failed parsing video {videoPath}: {e}") from e
 
 def main():
     if len(sys.argv) < 2:
@@ -82,7 +82,7 @@ def main():
     inputDir= sys.argv[1]
     videoAnalyzer= VideoAnalyzer()
 
-    for videoName in os.listdir(inputDir):
+    for videoName in sorted(os.listdir(inputDir)):
         if not videoName.lower().endswith(('.mp4', '.avi', '.mkv', '.mov')):
             print(f"Skipping non-video file: {videoName}")
             continue
@@ -96,14 +96,14 @@ def main():
             videoName= cleanedName
             videoPath= cleanedPath
 
-        #try:
-        suffix= videoAnalyzer.isPersonInVideo(videoPath)
-        if suffix:
-            newName = os.path.splitext(videoName)[0] + suffix + os.path.splitext(videoName)[1]
-            print(f"Moving {videoName} to {newName}\n")
-            os.rename(videoPath, os.path.join(inputDir, newName))
-        #except Exception as e:
-        #    print(f"Failed moving {videoName}: {e} \n", file=sys.stderr)
+        try:
+            suffix= videoAnalyzer.isPersonInVideo(videoPath)
+            if suffix:
+                newName = os.path.splitext(videoName)[0] + suffix + os.path.splitext(videoName)[1]
+                print(f"Moving {videoName} to {newName}")
+                os.rename(videoPath, os.path.join(inputDir, newName))
+        except Exception as e:
+            print(f"Failed moving {videoName}: {e}", file=sys.stderr)
 
 
 if __name__ == "__main__":
