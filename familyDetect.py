@@ -17,10 +17,10 @@ def removeSuffixes(filename, suffixes):
 
 class VideoAnalyzer:
 
-    model = YOLO("/home/vova/runs/detect/train5/weights/last.pt")
+    model = YOLO("/home/vova/runs/detect/train6/weights/best.pt")
     suffixes= ["_Vova", "_Sha", "_Leo"]
 
-    def isPersonInVideo(self, videoPath, frame_skip=20, confidence_threshold=0.92):
+    def isPersonInVideo(self, videoPath, frame_skip=20, confidence_threshold=0.9):
         print(f"Analyzing {videoPath}")
         cap = cv2.VideoCapture(videoPath)
         if not cap.isOpened():
