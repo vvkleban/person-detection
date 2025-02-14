@@ -17,7 +17,7 @@ def removeSuffixes(filename, suffixes):
 
 class VideoAnalyzer:
 
-    model = YOLO("/home/vova/runs/detect/train6/weights/best.pt")
+    model = YOLO("/home/vova/runs/detect/train10/weights/best.pt")
     suffixes= ["_Vova", "_Sha", "_Leo"]
 
     def isPersonInVideo(self, videoPath, frame_skip=20, confidence_threshold=0.9):
