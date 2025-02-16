@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import torch
 
 # Check if CUDA (NVIDIA GPUs) is available

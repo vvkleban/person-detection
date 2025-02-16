@@ -3,6 +3,7 @@ from ultralytics import YOLO
 import cv2
 import os
 import argparse
+import sys
 
 def extract_persons_from_videos(input_dir, output_dir, classNumber, confidence_threshold=0.85, frame_skip=1):
     # Load the pre-trained YOLOv8 model
@@ -108,10 +109,14 @@ if __name__ == "__main__":
     parser.add_argument("input_dir", help="Path to the video collection.")
     parser.add_argument("output_dir", help="Path to save the extracted data (images and labels).")
     parser.add_argument("class_number", type=int, help="Class number for person annotation.")
-    parser.add_argument("--confidence", type=float, default=0.85,
+    parser.add_argument("-c", "--confidence", type=float, default=0.85,
                         help="Confidence threshold for YOLO detection (default: 0.85).")
-    parser.add_argument("--frame-skip", type=int, default=1,
+    parser.add_argument("-f", "--frame-skip", type=int, default=1,
                         help="Process every N-th frame (default: 1, i.e. every frame).")
+    if len(sys.argv) < 3:
+        parser.print_help()
+        sys.exit(1)
+
     args = parser.parse_args()
 
     extract_persons_from_videos(

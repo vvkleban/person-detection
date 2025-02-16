@@ -1,6 +1,19 @@
+#!/usr/bin/env python3
 
-import sys
 import os
+import sys
+import argparse
+import yaml
+
+def load_classes_from_yaml(yaml_path):
+    """Loads class names from a YOLO training YAML file."""
+    try:
+        with open(yaml_path, "r") as file:
+            data = yaml.safe_load(file)
+            return data.get("names", [])
+    except Exception as e:
+        print(f"Error reading YAML file: {e}", file=sys.stderr)
+        sys.exit(1)
 
 def removeSuffixes(filename, suffixes):
     """
@@ -8,30 +21,36 @@ def removeSuffixes(filename, suffixes):
     """
     name, ext = os.path.splitext(filename)
     for suffix in suffixes:
-        name= name.replace(suffix, "")
+        name = name.replace(suffix, "")
     return name + ext
 
 def main():
-    if len(sys.argv) < 2:
-        scriptName= os.path.basename(__file__)
-        print(f"Usage: python3 {scriptName} <path_to_video_collection>")
-        exit(1)
+    """Parses command-line arguments and processes video filenames."""
+    parser = argparse.ArgumentParser(description="Remove suffixes from filenames based on YOLO class names.")
 
-    inputDir= sys.argv[1]
-    suffixes= ["_Vova", "_Sha", "_Leo"]
+    # Positional arguments
+    parser.add_argument("yaml_path", help="Path to the YOLO training YAML file")
+    parser.add_argument("video_path", help="Path to the video collection directory")
 
-    for videoName in sorted(os.listdir(inputDir)):
+    args = parser.parse_args()
+
+    # Load class names from YAML
+    class_names = load_classes_from_yaml(args.yaml_path)
+    suffixes = [f"_{name}" for name in class_names]
+
+    # Process video files
+    for videoName in sorted(os.listdir(args.video_path)):
         if not videoName.lower().endswith(('.mp4', '.avi', '.mkv', '.mov')):
             print(f"Skipping non-video file: {videoName}")
             continue
 
-        videoPath = os.path.join(inputDir, videoName)
+        videoPath = os.path.join(args.video_path, videoName)
         cleanedName = removeSuffixes(videoName, suffixes)
-        cleanedPath = os.path.join(inputDir, cleanedName)
-        if cleanedName != videoName:
-            print(f"Moving {videoName} to {cleanedName}")
-            os.rename(videoPath, cleanedPath)
+        cleanedPath = os.path.join(args.video_path, cleanedName)
 
+        if cleanedName != videoName:
+            print(f"Renaming {videoName} to {cleanedName}")
+            os.rename(videoPath, cleanedPath)
 
 if __name__ == "__main__":
     main()

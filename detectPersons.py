@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from ultralytics import YOLO
 import cv2
 import sys

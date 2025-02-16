@@ -1,0 +1,6 @@
+path: /path/to/your/dataset
+train: images  # Dataset subpath to training images - used to train your network
+val: images    # Dataset subpath to validation images - used to monitor training progress. Can be the same as training data
+nc: 3          # Number of classes (names of people)
+names: [Person1, Person2, Person3] # Rename these classes as you wish. Your custom network will mark people with these names
+
